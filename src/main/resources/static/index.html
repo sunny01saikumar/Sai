@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevAI Studio - AI Workbench for Software Developers</title>
+  
+  <!-- Modern Typography & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Highlight.js for Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/tokyo-night-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --panel-bg: #111827;
+      --card-bg: rgba(31, 41, 55, 0.6);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --code-bg: #0d1117;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #fff;
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #fff, var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .select-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .select-group label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    select, input[type="text"], input[type="password"] {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+    }
+
+    select option {
+      background: var(--panel-bg);
+      color: var(--text-main);
+    }
+
+    /* Main Container Layout */
+    main {
+      display: grid;
+      grid-template-columns: 240px 1fr 1fr;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border-color);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sidebar-section-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      padding-left: 0.5rem;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: left;
+    }
+
+    .nav-btn i {
+      width: 18px;
+      font-size: 1rem;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.15));
+      border-color: rgba(56, 189, 248, 0.3);
+      color: var(--primary);
+    }
+
+    /* Workspace Left Pane (Input Code & Prompts) */
+    .workspace-pane {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border-color);
+      background: #0d121d;
+    }
+
+    .pane-header {
+      padding: 0.75rem 1rem;
+      background: rgba(17, 24, 39, 0.6);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pane-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .pane-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-sm {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .btn-sm:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+      box-shadow: 0 0 18px var(--accent-glow);
+    }
+
+    .editor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 0.75rem;
+      overflow-y: auto;
+    }
+
+    .prompt-box {
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+
+    .prompt-box label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      outline: none;
+      resize: vertical;
+    }
+
+    .code-textarea {
+      flex: 1;
+      min-height: 250px;
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      color: #e2e8f0;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    /* Workspace Right Pane (Output & AI Response) */
+    .output-pane {
+      display: flex;
+      flex-direction: column;
+      background: var(--panel-bg);
+      overflow: hidden;
+    }
+
+    .output-content {
+      flex: 1;
+      padding: 1.25rem;
+      overflow-y: auto;
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+
+    .output-content h1, .output-content h2, .output-content h3, .output-content h4 {
+      color: #fff;
+      margin-top: 1.2rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .output-content p {
+      margin-bottom: 0.8rem;
+      color: #d1d5db;
+    }
+
+    .output-content ul, .output-content ol {
+      margin-left: 1.5rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .output-content code {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: var(--primary);
+    }
+
+    .output-content pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 0.8rem 0;
+    }
+
+    .output-content pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .placeholder-state {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      text-align: center;
+      gap: 1rem;
+      padding: 2rem;
+    }
+
+    .placeholder-icon {
+      font-size: 3rem;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(99, 102, 241, 0.2));
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      height: 100%;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(56, 189, 248, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Status Bar */
+    footer {
+      background: #070a10;
+      border-top: 1px solid var(--border-color);
+      padding: 0.4rem 1.2rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 200px 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+      }
+      .sidebar {
+        flex-direction: row;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-brain"></i>
+      </div>
+      <div>
+        <div class="brand-title">DevAI Studio</div>
+        <div class="brand-subtitle">AI Workbench for Software Engineers</div>
+      </div>
+    </div>
+
+    <div class="top-controls">
+      <div class="select-group">
+        <label><i class="fa-solid fa-code"></i> Lang:</label>
+        <select id="langSelect">
+          <option value="java">Java</option>
+          <option value="python">Python</option>
+          <option value="javascript">JavaScript / TypeScript</option>
+          <option value="sql">SQL</option>
+          <option value="cpp">C++</option>
+          <option value="go">Go</option>
+          <option value="rust">Rust</option>
+        </select>
+      </div>
+
+      <div class="select-group">
+        <label><i class="fa-solid fa-server"></i> Provider:</label>
+        <select id="providerSelect" onchange="toggleApiKeyInput()">
+          <option value="OLLAMA">Ollama (Local LLM)</option>
+          <option value="OPENAI">Cloud API (OpenAI/DeepSeek)</option>
+        </select>
+      </div>
+
+      <div class="select-group">
+        <label><i class="fa-solid fa-microchip"></i> Model:</label>
+        <select id="modelSelect">
+          <option value="codellama">CodeLlama</option>
+          <option value="deepseek-coder">DeepSeek Coder</option>
+          <option value="qwen2.5-coder">Qwen 2.5 Coder</option>
+          <option value="llama3">Llama 3</option>
+          <option value="gpt-4o-mini">GPT-4o Mini</option>
+        </select>
+      </div>
+
+      <div class="select-group" id="apiKeyContainer" style="display: none;">
+        <label><i class="fa-solid fa-key"></i> Key:</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-..." style="width: 110px;">
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid Workspace -->
+  <main>
+    <!-- Sidebar Tool Selection -->
+    <aside class="sidebar">
+      <div class="sidebar-section-title">Developer Suite</div>
+      
+      <button class="nav-btn active" data-mode="EXPLAIN" onclick="setMode('EXPLAIN', this)">
+        <i class="fa-solid fa-file-code"></i> Code Explainer
+      </button>
+
+      <button class="nav-btn" data-mode="FIX_BUGS" onclick="setMode('FIX_BUGS', this)">
+        <i class="fa-solid fa-bug"></i> Bug & Vulnerability Fixer
+      </button>
+
+      <button class="nav-btn" data-mode="UNIT_TEST" onclick="setMode('UNIT_TEST', this)">
+        <i class="fa-solid fa-vial"></i> Unit Test Generator
+      </button>
+
+      <button class="nav-btn" data-mode="REFACTOR" onclick="setMode('REFACTOR', this)">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> Code Refactoring & Clean
+      </button>
+
+      <button class="nav-btn" data-mode="SQL_GEN" onclick="setMode('SQL_GEN', this)">
+        <i class="fa-solid fa-database"></i> SQL & ORM Helper
+      </button>
+
+      <button class="nav-btn" data-mode="CHAT" onclick="setMode('CHAT', this)">
+        <i class="fa-solid fa-comments"></i> Pair Programmer Chat
+      </button>
+
+      <div class="sidebar-section-title">Quick Presets</div>
+      <button class="btn-sm" onclick="loadSampleCode('java')">
+        <i class="fa-brands fa-java"></i> Sample Java Bug
+      </button>
+      <button class="btn-sm" onclick="loadSampleCode('python')">
+        <i class="fa-brands fa-python"></i> Sample Python Script
+      </button>
+      <button class="btn-sm" onclick="loadSampleCode('sql')">
+        <i class="fa-solid fa-table"></i> Sample SQL Query
+      </button>
+    </aside>
+
+    <!-- Workspace Input Pane -->
+    <section class="workspace-pane">
+      <div class="pane-header">
+        <div class="pane-title" id="paneTitle">
+          <i class="fa-solid fa-file-code"></i> Code Input Editor
+        </div>
+        <div class="pane-actions">
+          <button class="btn-sm" onclick="clearEditor()"><i class="fa-solid fa-trash"></i> Clear</button>
+          <button class="btn-sm btn-primary" onclick="runAiTask()"><i class="fa-solid fa-bolt"></i> Run AI Analysis</button>
+        </div>
+      </div>
+
+      <div class="editor-container">
+        <div class="prompt-box">
+          <label id="promptLabel"><i class="fa-solid fa-message"></i> Custom Instruction / Specific Question (Optional):</label>
+          <textarea id="userPromptInput" rows="2" placeholder="e.g. Explain how error handling works in this snippet, or optimize for speed..."></textarea>
+        </div>
+
+        <textarea id="codeInput" class="code-textarea" placeholder="// Paste or type code here...
+public class OrderProcessor {
+    public void process(Order order) {
+        if (order != null) {
+            System.out.println(order.getId());
+        }
+    }
+}"></textarea>
+      </div>
+    </section>
+
+    <!-- Workspace Output Pane -->
+    <section class="output-pane">
+      <div class="pane-header">
+        <div class="pane-title">
+          <i class="fa-solid fa-terminal"></i> AI Output & Analysis
+        </div>
+        <div class="pane-actions">
+          <button class="btn-sm" onclick="copyOutput()"><i class="fa-solid fa-copy"></i> Copy Analysis</button>
+          <button class="btn-sm" onclick="copyGeneratedCode()"><i class="fa-solid fa-code"></i> Copy Code</button>
+        </div>
+      </div>
+
+      <div id="loadingState" class="loading-spinner">
+        <div class="spinner"></div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">Processing code with AI engine...</div>
+      </div>
+
+      <div id="placeholderState" class="placeholder-state">
+        <div class="placeholder-icon">
+          <i class="fa-solid fa-laptop-code"></i>
+        </div>
+        <div>
+          <h3>Ready for Developer Tasks</h3>
+          <p style="max-width: 320px; font-size: 0.8rem; margin-top: 0.4rem;">Select a tool from the left menu, paste your code, and click <strong>Run AI Analysis</strong> to get instant insights.</p>
+        </div>
+      </div>
+
+      <div id="outputContent" class="output-content" style="display: none;"></div>
+    </section>
+  </main>
+
+  <!-- Status Bar -->
+  <footer>
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span>Backend Status: <strong>Spring Boot 3.3.5 (Active)</strong></span>
+    </div>
+    <div id="modelStatusText">Endpoint: http://localhost:11434 | Ollama Local Engine</div>
+  </footer>
+
+  <script>
+    let currentMode = 'EXPLAIN';
+    let rawGeneratedCode = '';
+
+    function toggleApiKeyInput() {
+      const provider = document.getElementById('providerSelect').value;
+      const apiKeyContainer = document.getElementById('apiKeyContainer');
+      const modelSelect = document.getElementById('modelSelect');
+
+      if (provider === 'OPENAI') {
+        apiKeyContainer.style.display = 'flex';
+        modelSelect.value = 'gpt-4o-mini';
+        document.getElementById('modelStatusText').innerText = 'Endpoint: Cloud API | OpenAI / DeepSeek Compatible';
+      } else {
+        apiKeyContainer.style.display = 'none';
+        modelSelect.value = 'codellama';
+        document.getElementById('modelStatusText').innerText = 'Endpoint: http://localhost:11434 | Ollama Local Engine';
+      }
+    }
+
+    function setMode(mode, btnElement) {
+      currentMode = mode;
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
+
+      const titles = {
+        'EXPLAIN': '<i class="fa-solid fa-file-code"></i> Code Explainer Workspace',
+        'FIX_BUGS': '<i class="fa-solid fa-bug"></i> Bug Audit & Vulnerability Fixer',
+        'UNIT_TEST': '<i class="fa-solid fa-vial"></i> Unit Test Generator',
+        'REFACTOR': '<i class="fa-solid fa-wand-magic-sparkles"></i> Code Refactor & Clean Code Studio',
+        'SQL_GEN': '<i class="fa-solid fa-database"></i> SQL & ORM Helper',
+        'CHAT': '<i class="fa-solid fa-comments"></i> Software Engineering Assistant'
+      };
+
+      document.getElementById('paneTitle').innerHTML = titles[mode] || titles['EXPLAIN'];
+    }
+
+    function clearEditor() {
+      document.getElementById('codeInput').value = '';
+      document.getElementById('userPromptInput').value = '';
+    }
+
+    function loadSampleCode(type) {
+      if (type === 'java') {
+        document.getElementById('langSelect').value = 'java';
+        document.getElementById('codeInput').value = `public class PaymentService {\n    private Map<String, Double> balances = new HashMap<>();\n\n    public void transfer(String from, String to, double amount) {\n        // Bug: No validation or synchronization for race conditions\n        double fromBal = balances.get(from);\n        double toBal = balances.get(to);\n        balances.put(from, fromBal - amount);\n        balances.put(to, toBal + amount);\n    }\n}`;
+        setMode('FIX_BUGS', document.querySelector('[data-mode="FIX_BUGS"]'));
+      } else if (type === 'python') {
+        document.getElementById('langSelect').value = 'python';
+        document.getElementById('codeInput').value = `def process_user_data(users):\n    result = []\n    for u in users:\n        # Unhandled KeyError if 'email' is missing\n        formatted = u['name'].strip().lower() + ' <' + u['email'] + '>'\n        result.append(formatted)\n    return result`;
+        setMode('UNIT_TEST', document.querySelector('[data-mode="UNIT_TEST"]'));
+      } else if (type === 'sql') {
+        document.getElementById('langSelect').value = 'sql';
+        document.getElementById('userPromptInput').value = 'Generate an optimized query for top 5 customers with highest total order amount in last 30 days';
+        document.getElementById('codeInput').value = `-- Customers and Orders Schema\nCREATE TABLE customers (id INT PRIMARY KEY, name VARCHAR(100));\nCREATE TABLE orders (id INT PRIMARY KEY, customer_id INT, amount DECIMAL(10,2), order_date DATE);`;
+        setMode('SQL_GEN', document.querySelector('[data-mode="SQL_GEN"]'));
+      }
+    }
+
+    async function runAiTask() {
+      const code = document.getElementById('codeInput').value;
+      const userPrompt = document.getElementById('userPromptInput').value;
+      const language = document.getElementById('langSelect').value;
+      const modelProvider = document.getElementById('providerSelect').value;
+      const modelName = document.getElementById('modelSelect').value;
+      const apiKey = document.getElementById('apiKeyInput').value;
+
+      document.getElementById('placeholderState').style.display = 'none';
+      document.getElementById('outputContent').style.display = 'none';
+      document.getElementById('loadingState').style.display = 'flex';
+
+      const payload = {
+        code: code,
+        language: language,
+        actionMode: currentMode,
+        userPrompt: userPrompt,
+        modelProvider: modelProvider,
+        modelName: modelName,
+        apiKey: apiKey
+      };
+
+      try {
+        const response = await fetch('/api/ai/developer/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('outputContent').style.display = 'block';
+
+        if (data && data.responseMarkdown) {
+          rawGeneratedCode = data.generatedCode || '';
+          document.getElementById('outputContent').innerHTML = marked.parse(data.responseMarkdown);
+          hljs.highlightAll();
+        } else {
+          document.getElementById('outputContent').innerHTML = '<div style="color: var(--danger)">No response returned from AI backend.</div>';
+        }
+      } catch (err) {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('outputContent').style.display = 'block';
+        document.getElementById('outputContent').innerHTML = `<div style="color: var(--danger)">
+          <h3><i class="fa-solid fa-triangle-exclamation"></i> Error Communicating with Backend</h3>
+          <p>${err.message}</p>
+        </div>`;
+      }
+    }
+
+    function copyOutput() {
+      const text = document.getElementById('outputContent').innerText;
+      navigator.clipboard.writeText(text);
+      alert('Analysis output copied to clipboard!');
+    }
+
+    function copyGeneratedCode() {
+      if (rawGeneratedCode) {
+        navigator.clipboard.writeText(rawGeneratedCode);
+        alert('Generated code copied to clipboard!');
+      } else {
+        alert('No distinct code block found in output.');
+      }
+    }
+  </script>
+</body>
+</html>
